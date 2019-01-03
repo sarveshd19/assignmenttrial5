@@ -87,6 +87,7 @@ def update():
             oldid = request.form['old_id']
             student = Student.query.filter_by(student_id=oldid).first()
             student.student_name = request.form['name']
+            student.class_id = request.form['class_id']
             student.student_id = request.form['student_id']
             student.updated_on = datemod
             db.session.commit()
