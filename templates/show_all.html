@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+{%- for message in get_flashed_messages() %}
+{{ message }}
+{%- endfor %}
+
+<h3 align="center">Students</h3>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>class id</th>
+        <th>Date Added</th>
+        <th>Date Modified</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for student in students %}
+    <tr>
+        <td>{{student.student_id}}</td>
+        <td>{{ student.student_name }}</td>
+        <td>{{student.class_id}}</td>
+        <td>{{ student.created_on }}</td>
+        <td>{{ student.updated_on }}</td>
+        <td>
+            <form method="post" action="./updaterecord">
+                <input type="hidden" value="{{student.name}}" name="name">
+                <input type="hidden" value="{{student.student_id}}" name="student_id">
+                <input class="btn btn-primary" type="submit" value="update">
+
+            </form>
+            <form method="POST" action="./delete">
+                <input type="hidden" value="{{student.student_id}}" name="id">
+                <input type="submit" value="Delete" class="btn btn-danger">
+            </form>
+        </td>
+    </tr>
+
+
+    {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('new') }}" class="btn btn-info">Add Student
+</a>
+
+<a href="{{ url_for('viewclass') }}" class="btn btn-info">View classes</a>
+{% endblock %}
