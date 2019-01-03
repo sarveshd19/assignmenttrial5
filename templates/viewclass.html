@@ -5,7 +5,7 @@
 {{ message }}
 {%- endfor %}
 
-<h3 align="center">Students</h3>
+<h3 align="center">Classes</h3>
 
 <table class="table">
     <thead>
@@ -19,13 +19,16 @@
     </thead>
 
     <tbody>
-    {% for student in students %}
+    {% for class in classes %}
     <tr>
-        <td>{{student.class_id}}</td>
-        <td>{{ student.class_name }}</td>
-        <td>{{ student.created_on }}</td>
-        <td>{{ student.updated_on }}</td>
-        <td>{{ student.student }}</td>
+        <td>{{class.class_id}}</td>
+        <td>{{ class.class_name }}</td>
+        <td>{{ class.created_on }}</td>
+        <td>{{ class.updated_on }}</td>
+        <td> {% for student in  class.student %}
+              {{ student.student_name }}
+            {% endfor %}
+        </td>
 
     </tr>
 

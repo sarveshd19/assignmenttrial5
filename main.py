@@ -118,7 +118,7 @@ def delete():
 # Method for displaying classes
 @app.route("/viewclass")
 def viewclass():
-    return render_template("viewclass.html", students=Classroom.query.all())
+    return render_template("viewclass.html", classes=Classroom.query.all())
 
 
 if __name__ == '__main__':
