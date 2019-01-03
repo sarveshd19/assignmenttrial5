@@ -14,7 +14,7 @@
         <th>Name</th>
         <th>Date Added</th>
         <th>Date Modified</th>
-        <th>Action</th>
+        <th>Students</th>
     </tr>
     </thead>
 
@@ -24,19 +24,9 @@
         <td>{{student.class_id}}</td>
         <td>{{ student.class_name }}</td>
         <td>{{ student.created_on }}</td>
+        <td>{{ student.updated_on }}</td>
         <td>{{ student.student }}</td>
-        <td>
-            <form method="post" action="./updaterecord">
-                <input type="hidden" value="{{student.name}}" name="name">
-                <input type="hidden" value="{{student.student_id}}" name="student_id">
-                <input class="btn btn-primary" type="submit" value="update">
 
-            </form>
-            <form method="POST" action="./delete">
-                <input type="hidden" value="{{student.student_id}}" name="id">
-                <input type="submit" value="Delete" class="btn btn-danger">
-            </form>
-        </td>
     </tr>
 
 
@@ -44,7 +34,5 @@
     </tbody>
 </table>
 
-<a href="{{ url_for('new') }}" class="btn btn-info">Add Student
-</a>
 
 {% endblock %}
