@@ -6,13 +6,31 @@
 </div>
 {%- endfor %}
 
-<form action="{{ request.path }}" method="post">
+
+<form method="POST" action="/new">
+
+
     <label for="id">Id</label><br>
     <input type="text" name="student_id" placeholder="Id"/><br>
-    <label for="name">Name</label><br>
-    <input type="text" name="name" placeholder="Name"/><br>
-    <label for="Class">Class</label><br>
-    <input type="text" name="class_id" placeholder="class id"/><br>
-    <input type="submit" value="Submit"/>
+    Name:<input type="text" name="name"/><br>
+
+
+    ClassId : <select name="selectedid">
+    {% for class in classdetails %}
+    <option value="{{class.class_id}}">
+
+        {{class.class_name}} - {{class.class_id}}
+
+    </option>
+    {% endfor %}
+</select><br>
+    Appoint as Class Leader :
+    <select name="classleader">
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+    </select><br>
+
+
+    <input class="btn btn-success" type="submit" value="Add">
 </form>
 {% endblock %}

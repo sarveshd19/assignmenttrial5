@@ -25,10 +25,7 @@
         <td>{{ class.class_name }}</td>
         <td>{{ class.created_on }}</td>
         <td>{{ class.updated_on }}</td>
-        <td> {% for student in  class.student %}
-              {{ student.student_name }}
-            {% endfor %}
-        </td>
+        <td>{{ class.class_leader }}</td>
 
     </tr>
 

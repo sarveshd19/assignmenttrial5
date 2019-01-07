@@ -1,5 +1,6 @@
 from flask import Flask, request, flash, url_for, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import time
 import datetime
 
@@ -18,6 +19,7 @@ class Student(db.Model):
     student_name = db.Column(db.String(100))
     # Adding foreign key reference to class
     class_id = db.Column(db.Integer, db.ForeignKey('classroom.id'))
+    classroom = db.relationship("Classroom", foreign_keys='Classroom.class_leader')
     created_on = db.Column(db.String(50))
     updated_on = db.Column(db.String(50))
 
@@ -35,7 +37,8 @@ class Classroom(db.Model):
     class_id = db.Column('id', db.Integer, primary_key=True)
     class_name = db.Column(db.String(100))
     # Creating relationship with student entity
-    student = db.relationship("Student", backref="classroom", lazy="joined")
+    student = db.relationship("Student", backref="class_leader", foreign_keys='Student.class_id')
+    class_leader = db.Column(db.Integer, db.ForeignKey('student.id'))
     created_on = db.Column(db.String(50))
     updated_on = db.Column(db.String(50))
 
@@ -56,21 +59,31 @@ def show_all():
 @app.route('/new', methods=['GET', 'POST'])
 def new():
     if request.method == 'POST':
-        if not request.form['name'] or not request.form['student_id'] or not request.form['class_id']:
+        if not request.form['name'] or not request.form['student_id']:
             flash('Please enter all the fields', 'error')
         else:
             # To add timestamp when new user is created
             ts = time.time()
             timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             dateadd = timestamp
-            student = Student(request.form['student_id'], request.form['name'], request.form['class_id'], dateadd,
-                              dateadd)
+            classleader = request.form.get("classleader")
+            if classleader == "Yes":
+                student = Student(request.form['student_id'], request.form["name"], request.form['selectedid'], dateadd,
+                                  dateadd)
+                classinfo = Classroom.query.filter_by(class_id=request.form['selectedid']).first()
+                classinfo.class_leader = student.student_id
+                db.session.add(classinfo)
+
+
+            else:
+                student = Student(request.form['student_id'], request.form['name'], request.form['selectedid'], dateadd,
+                                  dateadd)
 
             db.session.add(student)
             db.session.commit()
             flash('Record was successfully added')
             return redirect(url_for('show_all'))
-    return render_template('new.html')
+    return render_template('new.html', classdetails=Classroom.query.all())
 
 
 # Method for updating student information
@@ -85,7 +98,12 @@ def update():
             timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             datemod = timestamp
             oldid = request.form['old_id']
-            student = Student.query.filter_by(student_id=oldid).first()
+            class_id = request.form['class_id']
+            classleader = request.form.get("classleader")
+            if classleader == "Yes":
+                student = Student.query.filter_by(student_id=oldid).first()
+                class_update = Classroom.query.filter_by(class_id=class_id).first()
+                class_update.class_leader = request.form['student_id']
             student.student_name = request.form['name']
             student.class_id = request.form['class_id']
             student.student_id = request.form['student_id']
@@ -110,9 +128,14 @@ def updaterecord():
 def delete():
     id = request.form.get("id")
     student = Student.query.filter_by(student_id=id).first()
-    db.session.delete(student)
-    db.session.commit()
-    return redirect(url_for('show_all'))
+    try:
+        db.session.delete(student)
+        db.session.commit()
+        return redirect(url_for('show_all'))
+    except IntegrityError:
+        flash('The Student you are trying to delete is the current Class Leader.'
+              ' Kindly appoint another Class Leader and try again.')
+        return redirect(url_for('show_all'))
 
 
 # Method for displaying classes
