@@ -12,11 +12,11 @@
 
     <label for="id">Id</label><br>
     <input type="text" name="student_id" placeholder="Id"/><br>
-    Name:<input type="text" name="name"/><br>
+    <label for="name">Name</label><br><input type="text" name="name"/><br>
 
 
-    ClassId : <select name="selectedid">
-    {% for class in classdetails %}
+    <label for="class ID">Class ID</label><br> <select name="selected_id">
+    {% for class in class_details %}
     <option value="{{class.class_id}}">
 
         {{class.class_name}} - {{class.class_id}}
@@ -25,7 +25,7 @@
     {% endfor %}
 </select><br>
     Appoint as Class Leader :
-    <select name="classleader">
+    <select name="class_leader">
         <option value="Yes">Yes</option>
         <option value="No">No</option>
     </select><br>

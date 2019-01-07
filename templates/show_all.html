@@ -28,7 +28,7 @@
         <td>{{ student.created_on }}</td>
         <td>{{ student.updated_on }}</td>
         <td>
-            <form method="post" action="./updaterecord">
+            <form method="post" action="./update_record">
                 <input type="hidden" value="{{student.name}}" name="name">
                 <input type="hidden" value="{{student.student_id}}" name="student_id">
                 <input class="btn btn-info" type="submit" value="update">
@@ -49,5 +49,5 @@
 <a href="{{ url_for('new') }}" class="btn btn-warning">Add Student
 </a>
 
-<a href="{{ url_for('viewclass') }}" class="btn btn-warning">View classes</a>
+<a href="{{ url_for('view_class') }}" class="btn btn-warning">View classes</a>
 {% endblock %}
