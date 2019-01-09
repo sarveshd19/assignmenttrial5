@@ -25,11 +25,9 @@ class Student(DB.Model):  # pylint: disable=too-few-public-methods
     created_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
     updated_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
 
-    def __init__(self, student_id, student_name, class_id):
-        self.student_id = student_id
+    def __init__(self, student_name, class_id):
         self.student_name = student_name
         self.class_id = class_id
-
 
 
 # Creating table classroom
@@ -48,8 +46,7 @@ class Classroom(DB.Model):  # pylint: disable=too-few-public-methods
         self.class_name = class_name
 
 
-
-@APP.route('/')
+@APP.route('/', methods=['GET', 'POST'])
 def show_all():
     """Method to display all students"""
     return render_template('show_all.html', students=Student.query.all())
@@ -60,14 +57,13 @@ def show_all():
 def new():
     """Method for adding new student"""
     if request.method == 'POST':
-        if not request.form['name'] or not request.form['student_id']:
+        if not request.form['name']:
             flash('Please enter all the fields', 'error')
         else:
 
-
             class_leader = request.form.get("class_leader")
             if class_leader == "Yes":
-                student = Student(request.form['student_id'], request.form["name"],
+                student = Student(request.form["name"],
                                   request.form['selected_id'])
                 class_info = Classroom.query.filter_by(class_id=request.form['selected_id']).first()
                 DB.session.add(student)
@@ -78,7 +74,7 @@ def new():
                 DB.session.add(class_info)
 
             else:
-                student = Student(request.form['student_id'], request.form['name'],
+                student = Student(request.form['name'],
                                   request.form['selected_id'])
                 DB.session.add(student)
                 DB.session.commit()
@@ -93,7 +89,7 @@ def new():
 def update():
     """Method for updating student information"""
     if request.method == 'POST':
-        if not request.form['name'] or not request.form['student_id'] \
+        if not request.form['student_name'] or not request.form['student_id'] \
                 or not request.form['class_id']:
             flash('Please enter all the fields', 'error')
         else:
@@ -101,13 +97,15 @@ def update():
             old_id = request.form['old_id']
             class_id = request.form['class_id']
             class_leader = request.form.get("class_leader")
+            student_id = request.form.get("student_id")
+            student_name = request.form.get("student_name")
             if class_leader == "Yes":
                 class_update = Classroom.query.filter_by(class_id=class_id).first()
                 class_update.class_leader = request.form['student_id']
             student = Student.query.filter_by(student_id=old_id).first()
-            student.student_name = request.form['name']
-            student.class_id = request.form['class_id']
-            student.student_id = request.form['student_id']
+            student.student_name = student_name
+            student.class_id = class_id
+            student.student_id = student_id
             student.updated_on = DB.func.now()
             DB.session.commit()
             flash('Record was successfully updated')
@@ -142,7 +140,7 @@ def delete():
 
 
 # Method for displaying classes
-@APP.route("/view_class")
+@APP.route("/view_class", methods=['GET', 'POST'])
 def view_class():
     """Method for displaying classes"""
     return render_template("view_class.html", classes=Classroom.query.all())
