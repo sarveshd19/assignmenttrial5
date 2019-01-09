@@ -14,7 +14,7 @@
         <th>Name</th>
         <th>Date Added</th>
         <th>Date Modified</th>
-        <th>Students</th>
+        <th>Class leader</th>
     </tr>
     </thead>
 
@@ -34,5 +34,10 @@
     </tbody>
 </table>
 
+<a href="{{ url_for('new_class') }}" class="btn btn-warning">Add Class
+</a>
+
+<a href="{{ url_for('show_all') }}" class="btn btn-warning">View Students
+</a>
 
 {% endblock %}

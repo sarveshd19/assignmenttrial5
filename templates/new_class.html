@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block body %}
+{%- for category, message in get_flashed_messages(with_categories = true) %}
+<div class="alert alert-danger">
+    {{ message }}
+</div>
+{%- endfor %}
+
+
+<form method="POST" action="/new_class">
+
+
+    <label for="name">Name</label><br><input type="text" name="class_name"/><br>
+
+
+    <input class="btn btn-success" type="submit" value="Add">
+</form>
+{% endblock %}

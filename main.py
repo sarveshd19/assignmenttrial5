@@ -22,15 +22,14 @@ class Student(DB.Model):  # pylint: disable=too-few-public-methods
     # Adding foreign key reference to class
     class_id = DB.Column(DB.Integer, DB.ForeignKey('classroom.id'))
     classroom = DB.relationship("Classroom", foreign_keys='Classroom.class_leader')
-    created_on = DB.Column(DB.String(50))
-    updated_on = DB.Column(DB.String(50))
+    created_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
+    updated_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
 
-    def __init__(self, student_id, student_name, class_id, created_on, updated_on):
+    def __init__(self, student_id, student_name, class_id):
         self.student_id = student_id
         self.student_name = student_name
         self.class_id = class_id
-        self.created_on = created_on
-        self.updated_on = updated_on
+
 
 
 # Creating table classroom
@@ -40,17 +39,14 @@ class Classroom(DB.Model):  # pylint: disable=too-few-public-methods
     class_id = DB.Column('id', DB.Integer, primary_key=True)
     class_name = DB.Column(DB.String(100))
     # Creating relationship with student entity
-    student = DB.relationship("Student", backref="class_leader", foreign_keys='Student.class_id')
+    student = DB.relationship("Student", foreign_keys='Student.class_id')
     class_leader = DB.Column(DB.Integer, DB.ForeignKey('student.id'))
-    created_on = DB.Column(DB.String(50))
-    updated_on = DB.Column(DB.String(50))
+    created_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
+    updated_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
 
-    def __init__(self, class_id, class_name, class_leader, created_on, updated_on):
-        self.class_id = class_id
+    def __init__(self, class_name):
         self.class_name = class_name
-        self.class_leader = class_leader
-        self.created_on = created_on
-        self.updated_on = updated_on
+
 
 
 @APP.route('/')
@@ -67,26 +63,26 @@ def new():
         if not request.form['name'] or not request.form['student_id']:
             flash('Please enter all the fields', 'error')
         else:
-            # To add timestamp when new user is created
-            raw_time = time.time()
-            timestamp = datetime.datetime.fromtimestamp(raw_time).strftime('%Y-%m-%d %H:%M:%S')
-            date_add = timestamp
+
+
             class_leader = request.form.get("class_leader")
             if class_leader == "Yes":
                 student = Student(request.form['student_id'], request.form["name"],
-                                  request.form['selected_id'], date_add,
-                                  date_add)
+                                  request.form['selected_id'])
                 class_info = Classroom.query.filter_by(class_id=request.form['selected_id']).first()
+                DB.session.add(student)
+                DB.session.commit()
                 class_info.class_leader = student.student_id
+                class_info.updated_on = DB.func.now()
+
                 DB.session.add(class_info)
 
             else:
                 student = Student(request.form['student_id'], request.form['name'],
-                                  request.form['selected_id'], date_add,
-                                  date_add)
+                                  request.form['selected_id'])
+                DB.session.add(student)
+                DB.session.commit()
 
-            DB.session.add(student)
-            DB.session.commit()
             flash('Record was successfully added')
             return redirect(url_for('show_all'))
     return render_template('new.html', class_details=Classroom.query.all())
@@ -101,10 +97,7 @@ def update():
                 or not request.form['class_id']:
             flash('Please enter all the fields', 'error')
         else:
-            # To add timestamp when student is updated
-            raw_time = time.time()
-            timestamp = datetime.datetime.fromtimestamp(raw_time).strftime('%Y-%m-%d %H:%M:%S')
-            date_mod = timestamp
+
             old_id = request.form['old_id']
             class_id = request.form['class_id']
             class_leader = request.form.get("class_leader")
@@ -115,7 +108,7 @@ def update():
             student.student_name = request.form['name']
             student.class_id = request.form['class_id']
             student.student_id = request.form['student_id']
-            student.updated_on = date_mod
+            student.updated_on = DB.func.now()
             DB.session.commit()
             flash('Record was successfully updated')
             return redirect(url_for('show_all'))
@@ -153,6 +146,21 @@ def delete():
 def view_class():
     """Method for displaying classes"""
     return render_template("view_class.html", classes=Classroom.query.all())
+
+
+@APP.route("/new_class", methods=['GET', 'POST'])
+def new_class():
+    """Adding new class"""
+    if request.method == 'POST':
+        if not request.form['class_name']:
+            flash('Please enter all details', 'error')
+        else:
+
+            class_info = Classroom(request.form['class_name'])
+            DB.session.add(class_info)
+            DB.session.commit()
+            return redirect(url_for('view_class'))
+    return render_template('new_class.html', classes=Classroom.query.all())
 
 
 if __name__ == '__main__':
