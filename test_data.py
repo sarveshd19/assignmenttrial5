@@ -1,27 +1,22 @@
-import main
-
-# def test_student(new_home):
-#    assert new_home.name == "BodduBhai
-
-dict_add = {"old_id": 101,
-            "class_id": 1,
-            "class_leader": "Yes",
-            "student_id": 101,
-            "student_name": "sarvesh",
-            "selected_id": 1,
-            "name": "sarvesh"}
+dict_update = {"old_id": 101,
+               "class_id": 1,
+               "class_leader": "Yes",
+               "student_id": 101,
+               "student_name": "sarvesh",
+               "selected_id": 1,
+               "name": "sarvesh"}
 
 dict_new = {
     "class_id": 1,
     "class_leader": "No",
-    "student_name": "sarvesh",
-}
+    "name": "sarvesh",
+    "selected_id": 1}
 
 dict_new_class = {
     "class_name": "BE EXTC A"
 }
 
-dict_delete = {"id": 3}
+dict_delete = {"id": 129}
 
 
 def test_home(test_resp_code):
@@ -36,15 +31,21 @@ def test_show_class(test_resp_code):
     assert resp.status_code == 200
 
 
-def test_show_update(test_resp_code):
+def test_new(test_resp_code):
     abc = test_resp_code
-    resp = abc.post('/update', data=dict_add)
+    resp = abc.post('new', data=dict_new)
     assert resp.status_code == 302
 
 
-def test_new(test_resp_code):
+def test_update(test_resp_code):
     abc = test_resp_code
-    resp = abc.post('new', data=dict_add)
+    resp = abc.post('/update_record', data=dict_update)
+    assert resp.status_code == 200
+
+
+def test_show_update(test_resp_code):
+    abc = test_resp_code
+    resp = abc.post('/update', data=dict_update)
     assert resp.status_code == 302
 
 
