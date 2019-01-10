@@ -21,7 +21,7 @@ dict_delete = {"id": 129}
 
 def test_home(test_resp_code):
     abc = test_resp_code
-    resp = abc.post('/?name="Ratan"')
+    resp = abc.post('/?name=""')
     assert resp.status_code == 200
 
 

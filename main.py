@@ -1,9 +1,8 @@
 """Main file for CRUD operations of student"""
-import time
-import datetime
 from flask import Flask, request, flash, url_for, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
+import uuid
 
 APP = Flask(__name__)
 # mysql db connection string
@@ -17,15 +16,16 @@ DB = SQLAlchemy(APP)
 class Student(DB.Model):  # pylint: disable=too-few-public-methods
     """Creating table student"""
     __tablename__ = 'student'
-    student_id = DB.Column('id', DB.Integer, primary_key=True)
+    student_id = DB.Column('id', DB.String(100), primary_key=True)
     student_name = DB.Column(DB.String(100))
     # Adding foreign key reference to class
-    class_id = DB.Column(DB.Integer, DB.ForeignKey('classroom.id'))
+    class_id = DB.Column(DB.String(100), DB.ForeignKey('classroom.id'))
     classroom = DB.relationship("Classroom", foreign_keys='Classroom.class_leader')
     created_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
     updated_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
 
-    def __init__(self, student_name, class_id):
+    def __init__(self, student_id, student_name, class_id):
+        self.student_id = student_id
         self.student_name = student_name
         self.class_id = class_id
 
@@ -34,15 +34,16 @@ class Student(DB.Model):  # pylint: disable=too-few-public-methods
 class Classroom(DB.Model):  # pylint: disable=too-few-public-methods
     """Creating table classroom"""
     __tablename__ = "classroom"
-    class_id = DB.Column('id', DB.Integer, primary_key=True)
+    class_id = DB.Column('id', DB.String(100), primary_key=True)
     class_name = DB.Column(DB.String(100))
     # Creating relationship with student entity
     student = DB.relationship("Student", foreign_keys='Student.class_id')
-    class_leader = DB.Column(DB.Integer, DB.ForeignKey('student.id'))
+    class_leader = DB.Column(DB.String(100), DB.ForeignKey('student.id'))
     created_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
     updated_on = DB.Column(DB.DateTime(), server_default=DB.func.now())
 
-    def __init__(self, class_name):
+    def __init__(self,class_id, class_name):
+        self.class_id = class_id
         self.class_name = class_name
 
 
@@ -63,8 +64,8 @@ def new():
 
             class_leader = request.form.get("class_leader")
             if class_leader == "Yes":
-                student = Student(request.form["name"],
-                                  request.form['selected_id'])
+                uid_id = uuid.uuid1()
+                student = Student(uid_id.int, request.form["name"], request.form['selected_id'])
                 class_info = Classroom.query.filter_by(class_id=request.form['selected_id']).first()
                 DB.session.add(student)
                 DB.session.commit()
@@ -74,7 +75,8 @@ def new():
                 DB.session.add(class_info)
 
             else:
-                student = Student(request.form['name'],
+                uid_id = uuid.uuid1()
+                student = Student(uid_id.int, request.form['name'],
                                   request.form['selected_id'])
                 DB.session.add(student)
                 DB.session.commit()
@@ -85,11 +87,11 @@ def new():
 
 
 # Method for updating student information
-@APP.route('/update', methods=['POST', 'GET'])
+@APP.route('/update', methods=['POST'])
 def update():
     """Method for updating student information"""
     if request.method == 'POST':
-        if not request.form['student_name'] or not request.form['student_id'] \
+        if not request.form['student_name'] \
                 or not request.form['class_id']:
             flash('Please enter all the fields', 'error')
         else:
@@ -97,15 +99,13 @@ def update():
             old_id = request.form['old_id']
             class_id = request.form['class_id']
             class_leader = request.form.get("class_leader")
-            student_id = request.form.get("student_id")
             student_name = request.form.get("student_name")
             if class_leader == "Yes":
                 class_update = Classroom.query.filter_by(class_id=class_id).first()
-                class_update.class_leader = request.form['student_id']
+                class_update.class_leader = request.form['old_id']
             student = Student.query.filter_by(student_id=old_id).first()
             student.student_name = student_name
             student.class_id = class_id
-            student.student_id = student_id
             student.updated_on = DB.func.now()
             DB.session.commit()
             flash('Record was successfully updated')
@@ -153,8 +153,8 @@ def new_class():
         if not request.form['class_name']:
             flash('Please enter all details', 'error')
         else:
-
-            class_info = Classroom(request.form['class_name'])
+            uid_id = uuid.uuid1()
+            class_info = Classroom(uid_id.int, request.form['class_name'])
             DB.session.add(class_info)
             DB.session.commit()
             return redirect(url_for('view_class'))
