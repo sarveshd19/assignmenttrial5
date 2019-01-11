@@ -68,11 +68,12 @@ def new():
                 student = Student(uid_id.int, request.form["name"], request.form['selected_id'])
                 class_info = Classroom.query.filter_by(class_id=request.form['selected_id']).first()
                 DB.session.add(student)
-                DB.session.commit()
+
                 class_info.class_leader = student.student_id
                 class_info.updated_on = DB.func.now()
 
                 DB.session.add(class_info)
+                DB.session.commit()
 
             else:
                 uid_id = uuid.uuid1()

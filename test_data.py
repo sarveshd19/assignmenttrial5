@@ -1,5 +1,5 @@
-dict_update = {"old_id": 101,
-               "class_id": 1,
+dict_update = {"old_id": "157945990136517569019708845704657370535",
+               "class_id": "53655506439711004738311928241632705959",
                "class_leader": "Yes",
                "student_id": 101,
                "student_name": "sarvesh",
@@ -7,21 +7,21 @@ dict_update = {"old_id": 101,
                "name": "sarvesh"}
 
 dict_new = {
-    "class_id": 1,
+    "class_id": "53655506439711004738311928241632705959",
     "class_leader": "No",
     "name": "sarvesh",
-    "selected_id": 1}
+    "selected_id": "53655506439711004738311928241632705959"}
 
 dict_new_class = {
     "class_name": "BE EXTC A"
 }
 
-dict_delete = {"id": 129}
+dict_delete = {"id": "170320365245479417011359743000895159719"}
 
 
 def test_home(test_resp_code):
     abc = test_resp_code
-    resp = abc.post('/?name=""')
+    resp = abc.post('/?name="sarvesh"')
     assert resp.status_code == 200
 
 
