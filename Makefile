@@ -7,3 +7,6 @@ pylint:
 test:
 	coverage run -m pytest
 	coverage report main.py
+
+db:
+	alembic upgrade fd9cf0389ab2
