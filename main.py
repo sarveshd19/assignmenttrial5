@@ -6,7 +6,7 @@ import uuid
 
 APP = Flask(__name__)
 # mysql db connection string
-APP.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:sarvesh@localhost/mytest1'
+APP.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/postgres'
 APP.config['SECRET_KEY'] = "sarveshdineshdeshmukh"
 
 DB = SQLAlchemy(APP)
@@ -64,11 +64,11 @@ def new():
 
             class_leader = request.form.get("class_leader")
             if class_leader == "Yes":
-                uid_id = uuid.uuid1()
-                student = Student(uid_id.int, request.form["name"], request.form['selected_id'])
+                uid_id = uuid.uuid4()
+                student = Student(str(uid_id), request.form["name"], request.form['selected_id'])
                 class_info = Classroom.query.filter_by(class_id=request.form['selected_id']).first()
                 DB.session.add(student)
-
+                DB.session.commit()
                 class_info.class_leader = student.student_id
                 class_info.updated_on = DB.func.now()
 
@@ -76,8 +76,8 @@ def new():
                 DB.session.commit()
 
             else:
-                uid_id = uuid.uuid1()
-                student = Student(uid_id.int, request.form['name'],
+                uid_id = uuid.uuid4()
+                student = Student(str(uid_id), request.form['name'],
                                   request.form['selected_id'])
                 DB.session.add(student)
                 DB.session.commit()
@@ -121,7 +121,7 @@ def update_record():
     current_id = request.form.get("student_id")
     student_update = Student.query.filter_by(student_id=current_id).first()
 
-    return render_template("update_record.html", student=student_update)
+    return render_template("update_record.html", student=student_update, class_room=Classroom.query.all())
 
 
 # Method for deleting student
@@ -154,12 +154,27 @@ def new_class():
         if not request.form['class_name']:
             flash('Please enter all details', 'error')
         else:
-            uid_id = uuid.uuid1()
-            class_info = Classroom(uid_id.int, request.form['class_name'])
+            uid_id = uuid.uuid4()
+            class_info = Classroom(str(uid_id), request.form['class_name'])
             DB.session.add(class_info)
             DB.session.commit()
             return redirect(url_for('view_class'))
     return render_template('new_class.html', classes=Classroom.query.all())
+
+
+# Method for deleting a class
+@APP.route("/class", methods=["POST"])
+def delete_class():
+    """Method for deleting student"""
+    class_id = request.form.get("id")
+    try:
+        current_class = Classroom.query.filter_by(class_id=class_id).first()
+        DB.session.delete(current_class)
+        DB.session.commit()
+        return redirect(url_for('view_class'))
+    except IntegrityError:
+        flash('Error while deleting class')
+        return redirect(url_for('view_class'))
 
 
 if __name__ == '__main__':

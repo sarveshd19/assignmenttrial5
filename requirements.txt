@@ -15,8 +15,8 @@ Mako==1.0.7
 MarkupSafe==1.1.0
 mccabe==0.6.1
 more-itertools==5.0.0
-mysql==0.0.2
-mysqlclient==1.3.14
+#mysql==0.0.2
+#mysqlclient==1.3.14
 myTest==1.65535.0
 pluggy==0.8.0
 py==1.7.0
